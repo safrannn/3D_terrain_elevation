@@ -1,0 +1,25 @@
+{
+  "name": "3d_terrain_elevation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack-dev-server --open --port 8081"
+  },
+  "author": "Cheng Su",
+  "license": "ISC",
+  "devDependencies": {
+    "html-webpack-plugin": "^3.2.0",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0"
+  },
+  "dependencies": {
+    "@babel/core": "^7.7.2",
+    "babel-loader": "^8.0.6",
+    "lodash": "^4.17.15",
+    "three": "^0.110.0",
+    "three-orbitcontrols": "^2.110.1"
+  }
+}
