@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 const OrbitControls = require('three-orbitcontrols')
 
-const planeSize = 500
-const elevationScale = 1
+const elevationScale = 0.000434 * (4372 - 176)
+const scale = 5
 
 
-var camera, controls, scene, renderer, plane
+var camera, controls, scene, renderer
+var planeSize, plane
 
 // setup scene
 scene = new THREE.Scene();
@@ -24,6 +25,12 @@ controls.enableDamping = true
 controls.dampingFactor = 0.25
 
 
+//add directional light
+var directionalLight = new THREE.DirectionalLight( 0xFFFFFF, 1 );
+directionalLight.position.set( 100, 350, 250 );
+directionalLight.castShadow = true;
+scene.add( directionalLight );
+
 //generate terrain
 generateTerrain()
 
@@ -36,53 +43,58 @@ animate()
 
 
 //return array with height data from img
-function getHeightData(img,scale) {
+function getHeightData(img) {
+  var canvas = document.createElement( 'canvas' );
+  canvas.width = img.width;
+  canvas.height = img.height;
+  var context = canvas.getContext( '2d' );
 
- if (scale == undefined) scale=1;
+  var size = img.width * img.height;
+  var data = new Float32Array( size );
 
-    var canvas = document.createElement( 'canvas' );
-    canvas.width = img.width;
-    canvas.height = img.height;
-    var context = canvas.getContext( '2d' );
-    context.drawImage(img,0,0, img.width, img.height);
+  context.drawImage(img,0,0);
 
-    var size = img.width * img.height;
-    var data = new Float32Array( size );
+  for ( var i = 0; i < size; i ++ ) {
+      data[i] = 0
+  }
 
-    for ( var i = 0; i < size; i ++ ) {
-        data[i] = 0
-    }
+  var imgd = context.getImageData(0, 0, img.width, img.height);
+  var pix = imgd.data;
 
-    var imgd = context.getImageData(0, 0, img.width, img.height);
-    var pix = imgd.data;
+  var j=0;
+  for (var i = 0; i<pix.length; i +=4) {
+      var all = pix[i]+pix[i+1]+pix[i+2];
+      data[j++] = all/12;
+  }
 
-    var j=0;
-    for (var i = 0; i<pix.length; i +=4) {
-        var all = pix[i]+pix[i+1]+pix[i+2];
-        data[j++] = all/(12*scale);
-    }
-
-    return data;
+  return data
 }
 
+function getTexture(img){
+
+}
 function generateTerrain(){
   // generate terrain
   var img = new Image()
 
   img.src = "src/height_map.png"
+
   img.onload = function () {
     //get height data from img
     var data = getHeightData(img)
 
+    planeSize = img.width
+
     // plane
-    var geometry = new THREE.PlaneGeometry(planeSize,planeSize,planeSize-1,planeSize-1);
-    // var texture = THREE.ImageUtils.loadTexture( img.src );
-    var material = new THREE.MeshNormalMaterial( {wireframe: true } );
+    var geometry = new THREE.PlaneGeometry(planeSize,planeSize,planeSize- 1 ,planeSize - 1);
+    var diffuseMap = new THREE.TextureLoader().load( img.src );
+    var normalMap = new THREE.TextureLoader().load("src/normal_map.png");
+    var material = new THREE.MeshLambertMaterial( {color:diffuseMap, normalMap: normalMap, wireframe: true } );
     plane = new THREE.Mesh( geometry, material );
 
     //set height of vertices
     for ( var i = 0; i<plane.geometry.vertices.length; i++ ) {
-      plane.geometry.vertices[i].z = data[i]*elevationScale;
+         plane.geometry.vertices[i].z = data[i] * elevationScale
     }
 
     plane.geometry.computeVertexNormals();
