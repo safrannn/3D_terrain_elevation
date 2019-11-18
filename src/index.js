@@ -1,14 +1,11 @@
 import * as THREE from 'three';
 const OrbitControls = require('three-orbitcontrols')
 
-
-
 var camera, controls, scene, renderer
 var planeSize, plane
-var heightLimit = 4272
-var elevationScale = 0.0316 * heightLimit
-var contourScale = 10
-var contourHeight = 500
+var heightLimit = 4300
+var elevationScale = 0.15 * heightLimit
+var contourStep = 500
 
 // setup scene
 scene = new THREE.Scene();
@@ -64,8 +61,7 @@ function readImageData(){
 //return array with height data from img
 function getHeightData() {
   var pix  = readImageData()
-  var size = img.width * img.height
-  var data = new Float32Array(size)
+  var data = new Float32Array(img.width * img.height)
 
   for (var i = 0; i < pix.length; i +=4) {
       data[i/4] = pix[i]
@@ -76,33 +72,22 @@ function getHeightData() {
 function getTexture(){
   var pix  = readImageData()
   var size = img.width * img.height
-  var data = new Uint8Array(img.width * img.height*4)
+  var data = new Uint8Array(img.width * img.height * 3)
 
+  var j = 0
   for (var i = 0; i < pix.length; i+=4) {
-    // var currentHeight = heightLimit * pix[i] / 256
-    // // console.log(currentHeight)
-    // if (currentHeight % contourHeight < 10){
-    //   data[i] = 0
-    //   data[i+1] = 0
-    //   data[i+2] = 0
-    //   data[i+3] = 255
-    // }else{
-    //   data[i] = 255
-    //   data[i+1] = 255
-    //   data[i+2] = 255
-    //   data[i+3] = 255
-    // }
-    if (pix[i] % 50 == 0){
-      data[i] = 0
-        data[i+1] = 0
-        data[i+2] = 0
-        data[i+3] = 255
-      }else{
-        data[i] = 255
-        data[i+1] = 255
-        data[i+2] = 255
-        data[i+3] = 255
-      }
+    var currentHeight = Math.round(heightLimit * pix[i] / 256)
+    var factor = Math.round(currentHeight / contourStep)
+    if (currentHeight % contourStep == 0 ){
+      data[j] = 0
+      data[j+1] = 0
+      data[j+2] = 0
+    }else{
+      data[j] = 22 + factor * 28
+      data[j+1] = 60 + factor * 24
+      data[j+2] = 128 - factor * 2
+    }
+    j += 3
   }
   return data
 }
@@ -110,26 +95,18 @@ function getTexture(){
 function generateTerrain(){
   // generate terrain
   img.onload = function () {
-    //get height data from img
-    var heightData = getHeightData()
-
-    planeSize = img.width
-    elevationScale /= (img.width * 0.25)
-
     // plane
+    planeSize = img.width
     var geometry = new THREE.PlaneGeometry(planeSize,planeSize,planeSize - 1 ,planeSize - 1)
-    var diffuseMap = new THREE.DataTexture(getTexture(), img.width, img.height, THREE.RGBAFormat )
+    var diffuseMap = new THREE.DataTexture(getTexture(), img.width, img.height, THREE.RGBFormat)
     diffuseMap.flipY = true
-    // var normalMap = new THREE.TextureLoader().load("src/normal_map.png")
-    var specularMap = new THREE.TextureLoader().load("src/specular_map.png")
-    var ambientMap = new THREE.TextureLoader().load("src/ambient_map.png")
-    // var material = new THREE.MeshStandardMaterial( {map:diffuseMap, normalMap:normalMap, specularMap:specularMap,aoMap: ambientMap, wireframe: false } )
-    var material = new THREE.MeshStandardMaterial({map:diffuseMap,specularMap:specularMap,aoMap: ambientMap})
+    var material = new THREE.MeshStandardMaterial({map:diffuseMap,metalness:0.0})
     plane = new THREE.Mesh( geometry, material )
 
     //set height of vertices
+    var heightData = getHeightData()
     for ( var i = 0; i<plane.geometry.vertices.length; i++ ) {
-         plane.geometry.vertices[i].z = heightData[i] * elevationScale
+         plane.geometry.vertices[i].z = heightData[i] * elevationScale / img.width
     }
 
     plane.geometry.computeVertexNormals();
