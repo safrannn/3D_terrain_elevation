@@ -3,7 +3,7 @@ const OrbitControls = require('three-orbitcontrols')
 
 var camera, controls, scene, renderer
 var planeSize, plane
-var heightLimit = 4300
+var heightLimit = 4800
 var elevationScale = 0.15 * heightLimit
 var contourStep = 500
 
@@ -24,14 +24,14 @@ controls.enableDamping = true
 controls.dampingFactor = 0.25
 
 //add directional light
-var directionalLight = new THREE.DirectionalLight( 0xFFFFFF, 1 );
+var directionalLight = new THREE.DirectionalLight( 0xFFFFFF, 1.2 );
 directionalLight.position.set( 100, 350, 250 );
 directionalLight.castShadow = true;
 scene.add( directionalLight );
 
 //load image
 var img = new Image()
-img.src = "src/height_map.png"
+img.src = "src/height_map2.png"
 
 //generate terrain
 generateTerrain()
@@ -77,15 +77,20 @@ function getTexture(){
   var j = 0
   for (var i = 0; i < pix.length; i+=4) {
     var currentHeight = Math.round(heightLimit * pix[i] / 256)
-    var factor = Math.round(currentHeight / contourStep)
-    if (currentHeight % contourStep == 0 ){
-      data[j] = 0
-      data[j+1] = 0
-      data[j+2] = 0
-    }else{
-      data[j] = 22 + factor * 28
-      data[j+1] = 60 + factor * 24
-      data[j+2] = 128 - factor * 2
+    var factor = Math.floor(currentHeight / contourStep)
+
+    // assign contour color
+    data[j] = 42 + factor * 22
+    data[j+1] = 22 + factor * 21
+    data[j+2] = 128 - factor * 13
+    // assign contour line
+    for (var k = 0; k < 20; k++){
+      if (currentHeight % contourStep < k){
+        data[j] = 255
+        data[j+1] = 255
+        data[j+2] = 255
+        break
+      }
     }
     j += 3
   }
@@ -109,7 +114,7 @@ function generateTerrain(){
          plane.geometry.vertices[i].z = heightData[i] * elevationScale / img.width
     }
 
-    plane.geometry.computeVertexNormals();
+    plane.geometry.computeVertexNormals(true);
 
     plane.rotateX(THREE.Math.degToRad(-90))
     scene.add(plane);
