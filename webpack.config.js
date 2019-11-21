@@ -12,7 +12,7 @@ module.exports = {
   },
   plugins: [
     new CopyPlugin([
-      { from: 'img', to: 'docs' },
+      { from: 'img', to: 'img' },
     ]),
   ],
 };
