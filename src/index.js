@@ -28,6 +28,15 @@ camera.lookAt( scene.position )
 controls.enableDamping = true
 controls.dampingFactor = 0.25
 
+// loading screen
+var progress = document.createElement('h1')
+progress.innerHTML = 'Loading'
+progress.id = 'progress'
+document.body.appendChild(progress)
+
+setTimeout(function(){progress.remove()}, 3000)
+
+
 //add directional light
 var directionalLight = new THREE.DirectionalLight( 0xFFFFFF, 1.0)
 directionalLight.position.set( 100, 350, 250 )
