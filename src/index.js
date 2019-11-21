@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 const OrbitControls = require('three-orbitcontrols')
+import * as dat from 'dat.gui'
 
 var camera, controls, scene, renderer
 var planeSize, plane
@@ -7,14 +8,18 @@ var heightLimit = 4800
 var elevationScale = 0.15 * heightLimit
 var contourStep = 500
 
+
+var colorBase = [42,22,128]
+var colorGradient = [22,21,-13]
+
 // setup scene
-scene = new THREE.Scene();
-scene.background = new THREE.Color( 'skyblue' )
+scene = new THREE.Scene()
+scene.background = new THREE.Color( 'black' )
 
 //setup renderer
-renderer = new THREE.WebGLRenderer({alpha: true});
+renderer = new THREE.WebGLRenderer({alpha: true})
 renderer.setSize(window.innerWidth, window.innerHeight)
-document.body.appendChild(renderer.domElement);
+document.body.appendChild(renderer.domElement)
 
 //setup camera
 camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000)
@@ -24,10 +29,10 @@ controls.enableDamping = true
 controls.dampingFactor = 0.25
 
 //add directional light
-var directionalLight = new THREE.DirectionalLight( 0xFFFFFF, 1.2 );
-directionalLight.position.set( 100, 350, 250 );
-directionalLight.castShadow = true;
-scene.add( directionalLight );
+var directionalLight = new THREE.DirectionalLight( 0xFFFFFF, 1.0)
+directionalLight.position.set( 100, 350, 250 )
+directionalLight.castShadow = true
+scene.add(directionalLight)
 
 //load image
 var img = new Image()
@@ -36,10 +41,26 @@ img.src = "src/height_map2.png"
 //generate terrain
 generateTerrain()
 
+// set up GUI
+// data for gui
+var gui = new dat.GUI()
+var heightLabel = gui.addFolder('Elevation(meter)')
+
+var params = new Object()
+for (var k = 1; k < heightLimit / contourStep ; k ++){
+  var r = colorBase[0] + colorGradient[0] * k
+  var g = colorBase[1] + colorGradient[1] * k
+  var b = colorBase[2] + colorGradient[2] * k
+  var newLabel = parseInt(k * contourStep)
+  params[newLabel] = [r,g,b]
+  heightLabel.addColor(params, newLabel)
+}
+
+
 //show image
 function animate(){
-  renderer.render(scene, camera);
-	requestAnimationFrame(animate);
+	requestAnimationFrame(animate)
+  renderer.render(scene, camera)
 }
 animate()
 
@@ -80,9 +101,9 @@ function getTexture(){
     var factor = Math.floor(currentHeight / contourStep)
 
     // assign contour color
-    data[j] = 42 + factor * 22
-    data[j+1] = 22 + factor * 21
-    data[j+2] = 128 - factor * 13
+    data[j] = colorBase[0] + factor * colorGradient[0]
+    data[j+1] = colorBase[1] + factor * colorGradient[1]
+    data[j+2] = colorBase[2] + factor * colorGradient[2]
     // assign contour line
     for (var k = 0; k < 20; k++){
       if (currentHeight % contourStep < k){
