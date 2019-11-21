@@ -22,9 +22,12 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
 //setup camera
-camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000)
+camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 4000)
 controls = new OrbitControls(camera, renderer.domElement)
-camera.lookAt( scene.position )
+camera.position.x = 200
+camera.position.y = 300
+camera.position.z = -100
+camera.lookAt(scene.position)
 controls.enableDamping = true
 controls.dampingFactor = 0.25
 
@@ -148,6 +151,6 @@ function generateTerrain(){
 
     plane.rotateX(THREE.Math.degToRad(-90))
     scene.add(plane);
-    camera.position.z = planeSize * 1.5
+    // camera.position.z = planeSize*1.5
   }
 }
