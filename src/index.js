@@ -45,7 +45,7 @@ scene.add(directionalLight)
 
 //load image
 var img = new Image()
-img.src = "src/height_map2.png"
+img.src = "img/height_map2.png"
 
 //generate terrain
 generateTerrain()

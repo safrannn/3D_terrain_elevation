@@ -10,6 +10,7 @@
   "author": "Cheng Su",
   "license": "ISC",
   "devDependencies": {
+    "copy-webpack-plugin": "^5.0.5",
     "html-webpack-plugin": "^3.2.0",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10",
