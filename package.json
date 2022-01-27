@@ -21,7 +21,7 @@
     "babel-loader": "^8.0.6",
     "dat.gui": "^0.7.6",
     "lodash": "^4.17.15",
-    "three": "^0.110.0",
+    "three": "^0.137.0",
     "three-orbitcontrols": "^2.110.1"
   }
 }
